@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Green FOX — Внутренняя система</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
+        }
+        body {
+            background: #f0f4f8;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1440px;
+            margin: 0 auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            background: #fff;
+            padding: 14px 24px;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            margin-bottom: 24px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a3a34;
+        }
+        .logo .fox-name {
+            color: #2ecc71;
+        }
+        .role-panel {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .role-panel button {
+            padding: 6px 18px;
+            border: none;
+            border-radius: 30px;
+            background: #e9edf4;
+            color: #1e2b3a;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .role-panel button:hover {
+            background: #d0d8e4;
+        }
+        .role-panel .active {
+            background: #1a3a34;
+            color: #fff;
+        }
+        .role-panel .active:hover {
+            background: #0f2a25;
+        }
+        .role-panel .admin-lock {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            color: #4f657b;
+        }
+        .role-panel .admin-lock input {
+            padding: 4px 10px;
+            border-radius: 30px;
+            border: 1px solid #d8dfe8;
+            font-size: 12px;
+            width: 120px;
+            outline: none;
+        }
+        .role-panel .admin-lock input:focus {
+            border-color: #2ecc71;
+        }
+        .password-error {
+            color: #b13e3e;
+            font-size: 12px;
+            display: none;
+        }
+        .password-error.show {
+            display: inline;
+        }
+
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px 18px;
+            background: #fff;
+            padding: 14px 22px;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            margin-bottom: 24px;
+            align-items: center;
+        }
+        .filters label {
+            font-weight: 500;
+            color: #1e2b3a;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .filters select, .filters input {
+            padding: 6px 12px;
+            border-radius: 30px;
+            border: 1px solid #d8dfe8;
+            background: #fafcfe;
+            font-size: 13px;
+            outline: none;
+        }
+        .filters select:focus, .filters input:focus {
+            border-color: #2ecc71;
+        }
+        .filters .clear-btn {
+            background: #e9edf4;
+            border: none;
+            border-radius: 30px;
+            padding: 6px 16px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: #1e2b3a;
+        }
+        .filters .clear-btn:hover {
+            background: #d0d8e4;
+        }
+        .filters .count-badge {
+            font-size: 13px;
+            color: #4f657b;
+            margin-left: auto;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .card {
+            background: #fff;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #eef2f7;
+            transition: 0.2s;
+            position: relative;
+        }
+        .card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+        .card-number {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(26, 58, 52, 0.85);
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 20px;
+            z-index: 5;
+            backdrop-filter: blur(2px);
+            letter-spacing: 0.3px;
+        }
+        .card-img {
+            width: 100%;
+            height: 160px;
+            object-fit: cover;
+            background: #dde3ec;
+            display: block;
+        }
+        .card-body {
+            padding: 14px 16px 16px;
+        }
+        .card-title {
+            font-weight: 700;
+            font-size: 15px;
+            color: #0f1a24;
+            margin-bottom: 4px;
+        }
+        .card-address {
+            font-size: 13px;
+            color: #3f5569;
+            margin-bottom: 6px;
+        }
+        .card-meta {
+            font-size: 12px;
+            color: #4f657b;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px 12px;
+            margin-top: 4px;
+        }
+        .card-meta span {
+            background: #f0f4fb;
+            padding: 2px 10px;
+            border-radius: 20px;
+        }
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .card-actions button {
+            background: #e9edf4;
+            border: none;
+            border-radius: 30px;
+            padding: 4px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #1e2b3a;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+        .card-actions button:hover {
+            background: #d0d8e4;
+        }
+        .card-actions .route-btn {
+            background: #1a3a34;
+            color: #fff;
+        }
+        .card-actions .route-btn:hover {
+            background: #0f2a25;
+        }
+        .card-actions .edit-btn {
+            background: #2ecc71;
+            color: #fff;
+        }
+        .card-actions .edit-btn:hover {
+            background: #27ae60;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.45);
+            backdrop-filter: blur(3px);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            padding: 20px;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        .modal {
+            background: #fff;
+            max-width: 720px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 24px;
+            padding: 28px 32px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .modal-close {
+            position: sticky;
+            top: 0;
+            float: right;
+            background: #eef2f7;
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        .modal-close:hover {
+            background: #dce3ec;
+        }
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0f1a24;
+            margin-bottom: 8px;
+        }
+        .modal-sub {
+            font-size: 15px;
+            color: #2f4a62;
+            margin-bottom: 16px;
+        }
+        .modal-detail {
+            margin: 8px 0;
+            line-height: 1.6;
+            color: #1e3347;
+            font-size: 14px;
+        }
+        .modal-detail strong {
+            color: #0f1a24;
+        }
+        .modal-images {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin: 12px 0;
+        }
+        .modal-images img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background: #f0f4f8;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .modal-images img:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .modal-route {
+            margin-top: 16px;
+            background: #1a3a34;
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .modal-route:hover {
+            background: #0f2a25;
+        }
+
+        /* ФОТО В ПОЛНЫЙ ЭКРАН */
+        .fullscreen-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.92);
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            padding: 30px;
+            cursor: pointer;
+        }
+        .fullscreen-overlay.active {
+            display: flex;
+        }
+        .fullscreen-overlay img {
+            max-width: 95%;
+            max-height: 95%;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            cursor: default;
+        }
+        .fullscreen-close {
+            position: fixed;
+            top: 20px;
+            right: 30px;
+            font-size: 40px;
+            color: #fff;
+            cursor: pointer;
+            z-index: 10000;
+            background: rgba(0,0,0,0.3);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            border: none;
+            color: #fff;
+            font-weight: 300;
+        }
+        .fullscreen-close:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.1);
+        }
+
+        .admin-panel {
+            background: #fff;
+            border-radius: 20px;
+            padding: 24px;
+            margin-top: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+            display: none;
+            border: 2px solid #2ecc71;
+        }
+        .admin-panel.active {
+            display: block;
+        }
+        .admin-panel h3 {
+            font-size: 18px;
+            color: #0f1a24;
+            margin-bottom: 16px;
+        }
+        .admin-panel h3 .green {
+            color: #2ecc71;
+        }
+        .admin-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+        .admin-actions button {
+            padding: 6px 20px;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            background: #2ecc71;
+            color: #fff;
+            transition: 0.15s;
+        }
+        .admin-actions button:hover {
+            background: #27ae60;
+        }
+        .admin-actions .danger {
+            background: #b13e3e;
+        }
+        .admin-actions .danger:hover {
+            background: #8f3131;
+        }
+
+        .admin-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            background: #f7fafd;
+            padding: 20px;
+            border-radius: 16px;
+            margin-top: 6px;
+        }
+        .admin-form input, .admin-form textarea, .admin-form select {
+            padding: 8px 14px;
+            border: 1px solid #d8dfe8;
+            border-radius: 12px;
+            font-size: 13px;
+            background: #fff;
+            width: 100%;
+        }
+        .admin-form textarea {
+            grid-column: 1 / -1;
+            resize: vertical;
+            min-height: 50px;
+        }
+        .admin-form label {
+            font-weight: 500;
+            color: #1e2b3a;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .admin-form .full {
+            grid-column: 1 / -1;
+        }
+        .admin-form .btn-group {
+            grid-column: 1 / -1;
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .admin-form .save-btn {
+            flex: 1;
+            background: #2ecc71;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            min-width: 120px;
+        }
+        .admin-form .save-btn:hover {
+            background: #27ae60;
+        }
+        .admin-form .delete-btn {
+            flex: 0 0 auto;
+            background: #b13e3e;
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 30px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .admin-form .delete-btn:hover {
+            background: #8f3131;
+        }
+
+        @media (max-width: 600px) {
+            .header { flex-direction: column; align-items: stretch; gap: 10px; }
+            .role-panel { justify-content: center; }
+            .filters { flex-direction: column; align-items: stretch; }
+            .admin-form { grid-template-columns: 1fr; }
+            .modal { padding: 20px; }
+            .admin-form .btn-group { flex-direction: column; }
+            .fullscreen-close { top: 10px; right: 10px; font-size: 30px; width: 40px; height: 40px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+
+    <!-- ШАПКА -->
+    <div class="header">
+        <div class="logo">
+            <span>🦊 Green <span class="fox-name">FOX</span></span>
+            <span style="font-size:14px;font-weight:400;color:#3f5569;margin-left:8px;">внутренняя система</span>
+        </div>
+        <div class="role-panel" id="rolePanel">
+            <button class="active" data-role="staff">🧹 Сотрудник</button>
+            <button data-role="admin" id="adminToggle">👑 Руководитель</button>
+            <div class="admin-lock" id="adminLock">
+                <span>🔒</span>
+                <input type="password" id="adminPassword" placeholder="Пароль" size="12">
+                <span class="password-error" id="passwordError">Неверный пароль!</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ФИЛЬТРЫ -->
+    <div class="filters">
+        <label>📍 Район:
+            <select id="districtFilter">
+                <option value="all">Все</option>
+                <option value="Ленинский">Ленинский</option>
+                <option value="Кировский">Кировский</option>
+                <option value="Советский">Советский</option>
+                <option value="Трусовский">Трусовский</option>
+            </select>
+        </label>
+        <label>🔑 Комнат:
+            <select id="roomsFilter">
+                <option value="all">Все</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+            </select>
+        </label>
+        <button class="clear-btn" id="clearFilters">Сбросить</button>
+        <span class="count-badge" id="countDisplay">Всего: 0</span>
+    </div>
+
+    <!-- СЕТКА КАРТОЧЕК -->
+    <div class="grid" id="cardsGrid"></div>
+
+    <!-- ПАНЕЛЬ РУКОВОДИТЕЛЯ -->
+    <div class="admin-panel" id="adminPanel">
+        <h3>👑 Управление квартирами <span class="green">Green FOX</span></h3>
+        <div class="admin-actions">
+            <button id="addFlatBtn">➕ Добавить</button>
+            <button id="cancelEditBtn" class="danger">✖ Отменить</button>
+        </div>
+        <div id="adminFormContainer"></div>
+        <p style="margin-top:12px;font-size:13px;color:#4f657b;">* Для редактирования нажмите «✎ Правка» на карточке.</p>
+    </div>
+</div>
+
+<!-- МОДАЛЬНОЕ ОКНО -->
+<div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+        <button class="modal-close" id="modalClose">✕</button>
+        <div id="modalContent"></div>
+    </div>
+</div>
+
+<!-- ПОЛНОЭКРАННЫЙ ПРОСМОТР ФОТО -->
+<div class="fullscreen-overlay" id="fullscreenOverlay" onclick="closeFullscreen()">
+    <button class="fullscreen-close" onclick="closeFullscreen()">✕</button>
+    <img id="fullscreenImage" src="" alt="Фото в полный экран" onclick="event.stopPropagation()">
+</div>
+
+<script>
+    // ================================================================
+    //  ВСЕ 92 КВАРТИРЫ
+    // ================================================================
+    const flatsData = [
+{ id: 1, displayNumber: "01", title: "Аршанский 4, кв. 10", address: "Астрахань, переулок Аршанский 4", district: "Ленинский", rooms: 1, guests: 3, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX! Эта квартира идеально подойдет для отдыха или продуктивной командировки.", amenities: "Двуспальная кровать и удобный двуспальный диван. Сплит-система, TV, стиральная машина, всё для глажки, быстрый Wi-Fi. Кухня: плита, СВЧ, холодильник, посуда. Ванная: полотенца, бельё, гигиенические наборы.", nearby: "Меньше 10 минут пешком до Студенческого парка. 15 мин до Комсомольской Набережной. 12 мин на машине до Кремля. Стадион рядом.", images: ["https://optim.tildacdn.com/stor6230-3136-4135-b134-353862646332/-/format/webp/11528226.jpg.webp","https://optim.tildacdn.com/stor3561-3132-4430-b436-363863636235/-/contain/780x586/center/center/-/format/webp/94284848.jpg.webp","https://optim.tildacdn.com/stor6138-6130-4430-a131-353763313934/-/contain/780x586/center/center/-/format/webp/24797666.jpg.webp","https://optim.tildacdn.com/stor3362-3834-4064-b862-356236663539/-/contain/780x584/center/center/-/format/webp/24202848.jpg.webp"] },
+        { id: 2, displayNumber: "02", title: "Аршанский 4, кв. 111", address: "Астрахань, Аршанский переулок, 4", district: "Кировский", rooms: 1, guests: 3, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать и удобный односпальный диван. Сплит-система, TV, стиральная машина, всё для глажки, быстрый Wi-Fi. Кухня: плита, СВЧ, холодильник, посуда.", nearby: "Меньше 10 минут пешком до Студенческого парка. 15 мин до Комсомольской Набережной. 12 мин на машине до Кремля. Стадион рядом.", images: ["https://optim.tildacdn.com/stor3566-3035-4436-b063-383031666366/-/format/webp/45050739.jpg.webp","https://optim.tildacdn.com/stor3030-6631-4533-b839-343238303135/-/contain/780x586/center/center/-/format/webp/72957124.jpg.webp","https://optim.tildacdn.com/stor3239-3537-4431-b030-386165306532/-/contain/780x586/center/center/-/format/webp/66835227.jpg.webp","https://optim.tildacdn.com/stor3161-3362-4266-b430-356436623865/-/contain/780x586/center/center/-/format/webp/34158188.jpg.webp"] },
+        { id: 3, displayNumber: "03", title: "Аршанский 4, кв. 154", address: "Астрахань, Аршанский переулок, 4", district: "Кировский", rooms: 1, guests: 2, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Удобный двуспальный диван. Сплит-система, TV, стиральная машина, всё для глажки, быстрый Wi-Fi. Кухня: плита, СВЧ, холодильник, посуда. Ванна.", nearby: "Студенческий парк, Комсомольская Набережная, Кремль.", images: ["https://optim.tildacdn.com/stor3333-6337-4339-b166-663338393661/-/format/webp/23e66570e42c474ece63f1f8f9cd7cbc.png.webp","https://optim.tildacdn.com/stor3332-3939-4466-b230-333231353766/-/format/webp/4274b4d52b229c50e9a100b3c36e4582.png.webp","https://optim.tildacdn.com/stor6132-3430-4232-a631-623931383734/-/format/webp/5d971cfdd0fbb3f0d1f7b4c4ea5a5e30.png.webp"] },
+        { id: 5, displayNumber: "05", title: "Аршанский 4, кв. 262", address: "Астрахань, Аршанский переулок, 4", district: "Ленинский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Студенческий парк, Комсомольская Набережная, Кремль.", images: ["https://optim.tildacdn.com/stor6434-6531-4334-b462-353230653464/-/format/webp/81493792.jpg.webp","https://optim.tildacdn.com/stor3662-6639-4931-b832-303235336666/-/format/webp/10925068.jpg.webp","https://optim.tildacdn.com/stor6363-6136-4534-b235-613931306139/-/contain/780x584/center/center/-/format/webp/40880182.jpg.webp","https://optim.tildacdn.com/stor6363-6533-4734-a532-353639366436/-/contain/780x586/center/center/-/format/webp/38944152.jpg.webp"] },
+        { id: 6, displayNumber: "06", title: "Аршанский 4, кв. 406", address: "Астрахань, Аршанский переулок, 4", district: "Кировский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Ванна + гигиенический душ.", nearby: "Студенческий парк, Комсомольская Набережная, Кремль.", images: ["https://optim.tildacdn.com/stor3039-3761-4334-b939-303037633537/-/contain/780x586/center/center/-/format/webp/c0b66c8176f7433bd73f05bdff31fed8.jpg.webp","https://optim.tildacdn.com/stor3137-3938-4132-a433-333835373966/-/contain/780x586/center/center/-/format/webp/982a263acfe60d04627b73f62d5a3a39.jpg.webp","https://optim.tildacdn.com/stor6436-6461-4634-a339-393433316534/-/contain/780x586/center/center/-/format/webp/ae6a1bba99e8f269e1807fe5e66e470a.jpg.webp","https://optim.tildacdn.com/stor6133-3838-4331-b231-643263303131/-/contain/780x586/center/center/-/format/webp/a0a50017e54cfc15f05c96476d35dc03.jpg.webp"] },
+        { id: 7, displayNumber: "07", title: "Аршанский 6, кв. 13", address: "Астрахань, пер. Аршанский, 6", district: "Ленинский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Студенческий парк, Комсомольская Набережная, Кремль.", images: ["https://static3.tildacdn.com/stor3137-3664-4632-b564-643765333965/50441714.jpg","https://static3.tildacdn.com/stor6563-3062-4966-b937-636239616263/50103510.jpg","https://static3.tildacdn.com/stor6234-3338-4738-a362-333963333865/25760956.jpg","https://static3.tildacdn.com/stor6234-3338-4738-a362-333963333865/25760956.jpg"] },
+        { id: 8, displayNumber: "08", title: "Латышева 3Ек1, кв. 139", address: "Астрахань, ул. Латышева, 3Е к1", district: "Ленинский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Студенческий парк, Комсомольская Набережная, Кремль.", images: ["https://optim.tildacdn.com/stor3138-6163-4665-a232-336131373764/-/format/webp/95493029.jpg.webp","https://optim.tildacdn.com/stor6531-6434-4463-b531-363261386131/-/format/webp/40532507.jpg.webp","https://optim.tildacdn.com/stor3039-3637-4861-b631-393030653663/-/format/webp/58745655.jpg.webp","https://optim.tildacdn.com/stor3534-3061-4834-a135-653761393030/-/format/webp/86739659.jpg.webp"] },
+        { id: 9, displayNumber: "09", title: "Савушкина 6Е, кв. 153", address: "Астрахань, ул. Савушкина, 6Е", district: "Ленинский", rooms: 1, guests: 2, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Парк Студенческий, Комсомольская Набережная. 10 мин до Городского острова.", images: ["https://optim.tildacdn.com/stor3736-3431-4566-a638-653237383031/-/contain/780x586/center/center/-/format/webp/78111390.jpg.webp","https://optim.tildacdn.com/stor3935-6563-4965-a132-306662306136/-/contain/780x586/center/center/-/format/webp/12140969.jpg.webp","https://optim.tildacdn.com/stor3764-6361-4366-b236-643139653532/-/contain/780x586/center/center/-/format/webp/59088964.jpg.webp","https://optim.tildacdn.com/stor6532-6633-4330-a631-633437373232/-/contain/780x586/center/center/-/format/webp/10767411.jpg.webp"] },
+        { id: 10, displayNumber: "10", title: "Савушкина 6И, кв. 34", address: "Астрахань, улица Савушкина, 6И", district: "Ленинский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Парк Студенческий, Комсомольская Набережная.", images: ["https://optim.tildacdn.com/stor6561-6562-4033-b138-333135376335/-/format/webp/70856169.jpg.webp","https://optim.tildacdn.com/stor6337-6434-4863-a164-323232373733/-/contain/780x584/center/center/-/format/webp/57745451.jpg.webp","https://optim.tildacdn.com/stor3162-6464-4733-a638-623530616531/-/contain/780x584/center/center/-/format/webp/59497301.jpg.webp","https://optim.tildacdn.com/stor3839-3866-4933-a337-343431323433/-/contain/780x584/center/center/-/format/webp/48639620.jpg.webp"] },
+        { id: 11, displayNumber: "11", title: "Савушкина 6Ж, кв. 19", address: "Астрахань, ул. Савушкина, 6Ж", district: "Ленинский", rooms: 1, guests: 2, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Парк Студенческий, Комсомольская Набережная.", images: ["https://optim.tildacdn.com/stor6131-6664-4162-a635-373362386339/-/format/webp/56247554.jpg.webp","https://optim.tildacdn.com/stor3064-3263-4630-b863-316139616366/-/contain/780x584/center/center/-/format/webp/63440926.jpg.webp","https://optim.tildacdn.com/stor3766-3665-4165-b734-626634333132/-/contain/780x584/center/center/-/format/webp/26688542.jpg.webp","https://optim.tildacdn.com/stor3338-6139-4430-a537-613230616134/-/contain/780x584/center/center/-/format/webp/11395195.jpg.webp"] },
+        { id: 12, displayNumber: "12", title: "Савушкина 6Ж, кв. 76", address: "Астрахань, ул. Савушкина, 6Ж", district: "Ленинский", rooms: 1, guests: 2, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Парк Студенческий, Комсомольская Набережная.", images: ["https://optim.tildacdn.com/stor3630-6339-4566-b033-346331653636/-/format/webp/20335351.jpg.webp","https://optim.tildacdn.com/stor3463-6338-4833-a166-366133313764/-/contain/780x586/center/center/-/format/webp/56930599.jpg.webp","https://optim.tildacdn.com/stor3162-6464-4162-b366-613139323635/-/contain/780x586/center/center/-/format/webp/61047620.jpg.webp","https://optim.tildacdn.com/stor3235-3336-4663-a466-666630653461/-/contain/780x586/center/center/-/format/webp/26825611.jpg.webp"] },
+        { id: 13, displayNumber: "13", title: "Савушкина 6Ж, кв. 77", address: "Астрахань, ул. Савушкина, 6Ж", district: "Ленинский", rooms: 1, guests: 3, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + односпальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Парк Студенческий, Комсомольская Набережная.", images: ["https://optim.tildacdn.com/stor3561-3761-4530-b265-353039323537/-/contain/780x586/center/center/-/format/webp/79831859.jpg.webp","https://optim.tildacdn.com/stor3661-3236-4866-b638-343563326238/-/contain/780x584/center/center/-/format/webp/86931340.jpg.webp","https://optim.tildacdn.com/stor3632-6264-4334-a430-333631386365/-/contain/780x586/center/center/-/format/webp/70739937.jpg.webp","https://optim.tildacdn.com/stor3637-3965-4430-a333-336563666536/-/format/webp/85872123.jpg.webp"] },
+        { id: 14, displayNumber: "14", title: "Савушкина 6К, кв. 247", address: "Астрахань, ул. Савушкина, 6К", district: "Ленинский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Парк Студенческий, Комсомольская Набережная.", images: ["https://optim.tildacdn.com/stor6462-3232-4337-b433-333464366162/-/format/webp/7e16601319b3529313f771f712ed1549.jpg.webp","https://optim.tildacdn.com/stor6464-6236-4431-b435-386139646266/-/contain/780x586/center/center/-/format/webp/17d96bb5332610ecf7113260a4ae06e2.jpg.webp","https://optim.tildacdn.com/stor3031-3933-4230-b836-376430363335/-/contain/780x586/center/center/-/format/webp/0ba342c5ab0368f60ff8e9541adca278.jpg.webp","https://optim.tildacdn.com/stor3161-3834-4538-b530-393734373832/-/contain/780x586/center/center/-/format/webp/d6ffd93081cfe1bff6d71b3f57cd8dac.jpg.webp"] },
+        { id: 15, displayNumber: "15", title: "Савушкина 6К, кв. 254", address: "Астрахань, ул. Савушкина, 6К", district: "Ленинский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Парк Студенческий, Комсомольская Набережная.", images: ["https://static3.tildacdn.com/stor3266-3431-4830-b638-376334643331/52596587.jpg","https://static3.tildacdn.com/stor3437-3235-4232-b065-313034326565/93288534.jpg","https://static3.tildacdn.com/stor3632-3964-4466-a563-636139386364/21176912.jpg","https://static3.tildacdn.com/stor6637-6632-4562-b535-366165373937/54533847.jpg"] },
+        { id: 16, displayNumber: "16", title: "Савушкина 6К, кв. 255", address: "Астрахань, ул. Савушкина, 6К", district: "Ленинский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Парк Студенческий, Комсомольская Набережная.", images: ["https://optim.tildacdn.com/stor6336-3231-4566-a366-646663323438/-/format/webp/69878976.jpg.webp","https://optim.tildacdn.com/stor3430-3439-4339-a561-636565336565/-/contain/780x584/center/center/-/format/webp/70215321.jpg.webp","https://optim.tildacdn.com/stor3538-6335-4830-b365-616161346235/-/contain/780x584/center/center/-/format/webp/83676534.jpg.webp","https://optim.tildacdn.com/stor3663-3831-4834-b264-633031363762/-/contain/780x584/center/center/-/format/webp/83464841.jpg.webp"] },
+        { id: 17, displayNumber: "17", title: "Савушкина 6К, кв. 256", address: "Астрахань, ул. Савушкина, 6К", district: "Ленинский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Парк Студенческий, Комсомольская Набережная.", images: ["https://optim.tildacdn.com/stor3966-3965-4433-a661-303066643466/-/format/webp/62911270.jpg.webp","https://optim.tildacdn.com/stor6438-3063-4834-a136-663565613137/-/contain/780x584/center/center/-/format/webp/68100300.jpg.webp","https://optim.tildacdn.com/stor6632-3235-4165-b934-323036636263/-/contain/780x584/center/center/-/format/webp/59900144.jpg.webp","https://optim.tildacdn.com/stor3162-3033-4637-b632-653634343937/-/contain/780x584/center/center/-/format/webp/73723790.jpg.webp"] },
+        { id: 18, displayNumber: "18", title: "Академика Королева 39, кв. 11", address: "Астрахань, ул. Академика Королёва, 39", district: "Кировский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Театр Оперы и Балета, ТЦ Ярмарка, Парк Аркадия.", images: ["https://optim.tildacdn.com/stor3939-3031-4530-b336-336239643264/-/contain/780x584/center/center/-/format/webp/44739144.jpg.webp","https://optim.tildacdn.com/stor6361-6164-4337-b139-613131643937/-/contain/780x586/center/center/-/format/webp/74167045.jpg.webp","https://optim.tildacdn.com/stor6532-6461-4134-b866-386631363134/-/contain/780x584/center/center/-/format/webp/59800919.jpg.webp","https://optim.tildacdn.com/stor3363-6165-4230-b935-356332646533/-/contain/780x584/center/center/-/format/webp/73069961.jpg.webp"] },
+        { id: 19, displayNumber: "19", title: "1-я Перевозная 131Б, кв. 86", address: "Астрахань, 1-я Перевозная улица, 131Б", district: "Ленинский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "ТРК Три кота, Парк Аркадия, Театр оперы и балета.", images: ["https://optim.tildacdn.com/stor3239-6437-4064-b965-303264616237/-/format/webp/86051205.jpg.webp","https://optim.tildacdn.com/stor3466-6463-4438-a562-353864326465/-/contain/780x586/center/center/-/format/webp/52995556.jpg.webp","https://optim.tildacdn.com/stor6461-3365-4332-a435-343533633632/-/contain/780x586/center/center/-/format/webp/90298470.jpg.webp","https://optim.tildacdn.com/stor3065-3635-4132-a438-313761353832/-/contain/780x586/center/center/-/format/webp/70454168.jpg.webp"] },
+        { id: 21, displayNumber: "21", title: "Адмиралтейская улица, 4", address: "Астрахань, Адмиралтейская улица, 4", district: "Кировский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Гигиенический душ.", nearby: "Домик лебедей, планетарий, Кремль 10 мин пешком.", images: ["https://optim.tildacdn.com/stor6237-3434-4336-a566-386132633063/-/format/webp/2efbe2fae79aa8010aea44db16f73ef1.jpg.webp","https://optim.tildacdn.com/stor3761-6166-4332-b066-636365633361/-/contain/780x586/center/center/-/format/webp/7a1ca24ab983e1204453a5b81dc3be98.jpg.webp","https://optim.tildacdn.com/stor3664-6361-4234-b431-343739316364/-/contain/780x586/center/center/-/format/webp/7afe637f01ea3b4b997f7f59ae8a8ef6.jpg.webp","https://optim.tildacdn.com/stor3832-3633-4562-b462-396234643132/-/contain/780x586/center/center/-/format/webp/203219ef83c8712e2b6d0cf77164da6e.jpg.webp"] },
+        { id: 22, displayNumber: "22", title: "Бакинская 90, кв. 134", address: "Астрахань, ул. Бакинская, 90", district: "Советский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Ванна + гигиенический душ.", nearby: "Собор Святого Владимира, Кремль 7 мин на авто.", images: ["https://static3.tildacdn.com/stor3765-3731-4563-b030-643936393061/49048360.jpg","https://static3.tildacdn.com/stor3665-6566-4466-b662-373737396436/19507783.jpg","https://static3.tildacdn.com/stor3530-3963-4565-a130-656164666134/18180886.jpg","https://static3.tildacdn.com/stor3234-3664-4363-b937-303864383532/84367207.jpg"] },
+        { id: 24, displayNumber: "24", title: "Ген. Епишева 19, кв. 108", address: "Астрахань, ул. Ген. Епишева, 19", district: "Советский", rooms: 1, guests: 2, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Храм Святого Князя Владимира, ТЦ Алимпик.", images: ["https://optim.tildacdn.com/stor3962-3439-4063-b237-303962616561/-/format/webp/66023824.jpg.webp","https://optim.tildacdn.com/stor3734-3636-4431-b333-666235313964/-/contain/780x586/center/center/-/format/webp/83968490.jpg.webp","https://optim.tildacdn.com/stor6238-6163-4630-a664-626262333233/-/contain/780x586/center/center/-/format/webp/74344160.jpg.webp","https://optim.tildacdn.com/stor3961-6438-4537-b835-333338383862/-/contain/780x586/center/center/-/format/webp/91396112.jpg.webp"] },
+        { id: 25, displayNumber: "25", title: "Ген. Епишева 19, кв. 110", address: "Астрахань, улица Генерала Епишева, 19", district: "Советский", rooms: 1, guests: 2, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Удобный двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Душевая.", nearby: "Храм Святого Князя Владимира, ТЦ Алимпик.", images: ["https://optim.tildacdn.com/stor6364-6565-4837-b737-623032336431/-/contain/780x584/center/center/-/format/webp/68938722.jpg.webp","https://optim.tildacdn.com/stor6339-3634-4163-a631-333733313836/-/contain/780x586/center/center/-/format/webp/23612112.jpg.webp","https://optim.tildacdn.com/stor6634-3562-4266-a335-366638313735/-/contain/780x584/center/center/-/format/webp/76757304.jpg.webp","https://optim.tildacdn.com/stor6462-3136-4966-a261-643166363836/-/contain/780x586/center/center/-/format/webp/58440199.jpg.webp"] },
+        { id: 26, displayNumber: "26", title: "Ген. Епишева 49А, кв. 253", address: "Астрахань, ул. Генерала Епишева, 49А", district: "Советский", rooms: 1, guests: 2, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Удобный двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Парк Дружбы, Собор Святого Князя Владимира.", images: ["https://static3.tildacdn.com/stor6431-3232-4566-b666-376561616433/35617857.jpg","https://static3.tildacdn.com/stor6633-6636-4532-b864-376162356137/59794048.jpg","https://static3.tildacdn.com/stor6436-3431-4839-a437-386338383565/59585719.jpg","https://static3.tildacdn.com/stor6164-6631-4266-b831-366538633562/46599194.jpg"] },
+        { id: 27, displayNumber: "27", title: "Трофимова 7Ак1, кв. 92", address: "Астрахань, улица Трофимова, 7Ак1", district: "Советский", rooms: 1, guests: 2, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Собор Святого Владимира, ТЦ Alimpic, набережная.", images: ["https://optim.tildacdn.com/stor3066-3739-4438-b764-646337313632/-/format/webp/39796295.jpg.webp","https://optim.tildacdn.com/stor3661-3936-4235-a530-376439373638/-/contain/780x584/center/center/-/format/webp/86739185.jpg.webp","https://optim.tildacdn.com/stor3362-3636-4862-a565-653365343265/-/contain/780x586/center/center/-/format/webp/41621217.jpg.webp","https://optim.tildacdn.com/stor6361-3064-4864-b938-396137653138/-/contain/780x584/center/center/-/format/webp/92518795.jpg.webp"] },
+        { id: 28, displayNumber: "28", title: "Автомобильная, 8, кв. 199", address: "Астрахань, ул. Автомобильная 8, кв. 199", district: "Советский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + раскладной диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Центр семейного отдыха Баба Фрося, Собор Святого Владимира.", images: ["https://optim.tildacdn.com/stor6337-6438-4831-a665-333865346265/-/format/webp/24147952.jpg.webp","https://optim.tildacdn.com/stor3839-6564-4637-b830-643737336162/-/contain/780x438/center/center/-/format/webp/50941224.jpg.webp","https://optim.tildacdn.com/stor3761-6137-4730-b936-333335313931/-/contain/780x438/center/center/-/format/webp/28514654.jpg.webp","https://optim.tildacdn.com/stor6165-3431-4334-b138-333839666634/-/contain/780x438/center/center/-/format/webp/47755272.jpg.webp"] },
+        { id: 29, displayNumber: "29", title: "Автомобильная, 8, кв. 257", address: "Астрахань, Автомобильная улица, 8", district: "Советский", rooms: 1, guests: 2, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Удобный двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Центр семейного отдыха Баба Фрося, Собор Святого Владимира.", images: ["https://static3.tildacdn.com/stor6333-3234-4431-a235-313063343063/28265600.jpg","https://static3.tildacdn.com/stor3661-6362-4965-b362-396266343165/50223446.jpg","https://static3.tildacdn.com/stor6536-6136-4866-b938-626361353434/30527201.jpg","https://static3.tildacdn.com/stor3662-6363-4566-b064-643564353664/70183475.jpg"] },
+        { id: 30, displayNumber: "30", title: "Боевая 30, кв. 38", address: "Астрахань, ул. Боевая, 30", district: "Советский", rooms: 1, guests: 3, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + мини-диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Собор Святого Владимира, ТЦ Alimpic.", images: ["https://optim.tildacdn.com/stor3263-3933-4163-b636-643838643165/-/format/webp/85920958.jpg.webp","https://optim.tildacdn.com/stor6534-3665-4832-b363-353231346631/-/contain/780x584/center/center/-/format/webp/61355854.jpg.webp","https://optim.tildacdn.com/stor6433-6434-4666-b337-366365323339/-/contain/780x584/center/center/-/format/webp/48372272.jpg.webp","https://optim.tildacdn.com/stor3436-3632-4535-b136-373663323630/-/contain/780x584/center/center/-/format/webp/13055861.jpg.webp"] },
+        { id: 31, displayNumber: "31", title: "Вагнера 23, кв. 163", address: "Астрахань, ул. Вагнера, 23", district: "Кировский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Рынок Большие Исады, Красная Набережная, зоопарк.", images: ["https://static3.tildacdn.com/stor6436-3566-4162-b164-376439366431/48190072.jpg","https://static3.tildacdn.com/stor3464-3339-4230-b530-643834353939/78661474.jpg","https://static3.tildacdn.com/stor6162-6231-4234-b038-343863656137/66317428.jpg","https://static3.tildacdn.com/stor6165-3766-4163-b534-323438326637/26917692.jpg"] },
+        { id: 32, displayNumber: "32", title: "Бехтерева 2Б, кв. 362", address: "Астрахань, ул. Бехтерева 2Б", district: "Советский", rooms: 1, guests: 2, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Удобный двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://static.tildacdn.com/stor3938-6231-4466-a262-626232323036/40767696.jpg","https://static.tildacdn.com/stor3366-3234-4732-a332-383434363333/91360019.jpg","https://static.tildacdn.com/stor6430-3837-4561-a261-663237336466/59133705.jpg","https://static.tildacdn.com/stor3137-3961-4235-b936-656464396134/34492176.jpg"] },
+        { id: 33, displayNumber: "33", title: "НПЗ 20В, кв. 74", address: "Астрахань, ул. Набережная Приволжского Затона, 20В", district: "Кировский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Рабочее место.", nearby: "Набережная у дома, Кремль 6 мин на авто.", images: ["https://optim.tildacdn.com/stor6237-3932-4233-a461-636364623631/-/format/webp/24508331.jpg.webp","https://optim.tildacdn.com/stor3231-3062-4662-b434-663738643039/-/contain/780x586/center/center/-/format/webp/79749353.jpg.webp","https://optim.tildacdn.com/stor6536-3833-4132-b538-616436653235/-/contain/780x586/center/center/-/format/webp/24931596.jpg.webp","https://optim.tildacdn.com/stor6363-3134-4064-b864-663065306236/-/contain/780x586/center/center/-/format/webp/71481412.jpg.webp"] },
+        { id: 34, displayNumber: "34", title: "НПЗ 20Г, кв. 28", address: "Астрахань, ул. Набережная Приволжского Затона, 20Г", district: "Кировский", rooms: 1, guests: 2, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 6 мин на авто.", images: ["https://optim.tildacdn.com/stor3465-3838-4339-a364-343730626537/-/format/webp/10130816.jpg.webp","https://optim.tildacdn.com/stor6432-6337-4133-b866-393561303632/-/contain/780x520/center/center/-/format/webp/41834369.jpg.webp","https://optim.tildacdn.com/stor6335-3837-4134-a538-643763303237/-/contain/780x520/center/center/-/format/webp/62181638.jpg.webp","https://optim.tildacdn.com/stor6236-3631-4530-b564-396266656664/-/contain/780x1170/center/center/-/format/webp/97217928.jpg.webp"] },
+        { id: 35, displayNumber: "35", title: "НПЗ 20Г, кв. 52", address: "Астрахань, ул. Набережная Приволжского Затона, 20Г", district: "Кировский", rooms: 1, guests: 2, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 6 мин на авто.", images: ["https://static3.tildacdn.com/stor3432-6433-4439-b636-336636313439/91231164.jpg","https://static3.tildacdn.com/stor6530-6162-4463-a633-396239306137/80388685.jpg","https://static3.tildacdn.com/stor6234-3262-4761-b333-613564316130/88007946.jpg","https://static3.tildacdn.com/stor3235-3865-4066-a665-626462383464/78183566.jpg"] },
+        { id: 36, displayNumber: "36", title: "Коммунистическая 8, кв. 74", address: "Астрахань, ул. Коммунистическая, 8", district: "Кировский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Кремль и Братский сад 10 мин пешком, Драматический театр.", images: ["https://optim.tildacdn.com/stor3164-3762-4931-b231-316337343031/-/format/webp/32138044.jpg.webp","https://optim.tildacdn.com/stor6136-3238-4030-a338-363464303837/-/contain/780x586/center/center/-/format/webp/38183724.jpg.webp","https://optim.tildacdn.com/stor6666-3332-4333-b438-353561383936/-/contain/780x586/center/center/-/format/webp/39375280.jpg.webp","https://optim.tildacdn.com/stor3337-3061-4536-b032-313830336632/-/contain/780x586/center/center/-/format/webp/66618167.jpg.webp"] },
+        { id: 37, displayNumber: "37", title: "Студенческая 7, кв. 174", address: "Астрахань, ул. Студенческая, 7", district: "Кировский", rooms: 1, guests: 2, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Астраханский цирк, Аквапарк Золотой джин.", images: ["https://optim.tildacdn.com/stor6233-3439-4265-b638-643630656465/-/format/webp/93022134.jpg.webp","https://optim.tildacdn.com/stor3136-6534-4138-b632-643032316561/-/contain/780x584/center/center/-/format/webp/48421259.jpg.webp","https://optim.tildacdn.com/stor3662-6266-4662-b932-653936333533/-/contain/780x584/center/center/-/format/webp/50904189.jpg.webp","https://optim.tildacdn.com/stor3634-6561-4836-b732-346337366162/-/contain/780x584/center/center/-/format/webp/70408846.jpg.webp"] },
+        { id: 38, displayNumber: "38", title: "Студенческая 7, кв. 193", address: "Астрахань, ул. Студенческая, 7", district: "Кировский", rooms: 1, guests: 2, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Душевая.", nearby: "Астраханский цирк, Аквапарк Золотой джин.", images: ["https://static3.tildacdn.com/stor3866-3665-4931-b635-383038643162/16866611.jpg","https://static3.tildacdn.com/stor6333-3735-4738-a332-396264366265/43631180.jpg","https://static3.tildacdn.com/stor3938-6364-4339-b539-393236663364/64728622.jpg","https://static3.tildacdn.com/stor3137-6164-4761-b834-316665643164/82106417.jpg"] },
+        { id: 41, displayNumber: "41", title: "Савушкина 37к1, кв. 71", address: "Астрахань, ул. Савушкина, 37к1", district: "Ленинский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Парк Студенческий, Комсомольская Набережная.", images: ["https://optim.tildacdn.com/stor3862-6530-4038-b131-386539613233/-/format/webp/61709007.jpg.webp","https://optim.tildacdn.com/stor3665-6261-4137-b334-633937346239/-/contain/780x520/center/center/-/format/webp/48577654.jpg.webp","https://optim.tildacdn.com/stor3563-3265-4664-b032-343665393535/-/contain/780x520/center/center/-/format/webp/12023769.jpg.webp","https://optim.tildacdn.com/stor3532-6337-4262-b365-633336613362/-/format/webp/43246838.jpg.webp"] },
+        { id: 42, displayNumber: "42", title: "Московская 89, кв. 101", address: "Астрахань, Московская улица, 89", district: "Ленинский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Театр Оперы и Балета, сквер 60 лет Сталинградской битвы.", images: ["https://optim.tildacdn.com/stor3137-3633-4862-a561-663662326537/-/format/webp/99fc72c2cac0492b988453b0b324ce80.jpg.webp","https://optim.tildacdn.com/stor3866-3864-4930-a166-633138346238/-/format/webp/2ee11c420e3b3c04ff3c8665cab95377.jpg.webp","https://optim.tildacdn.com/stor3135-3566-4639-b435-346538613266/-/contain/780x586/center/center/-/format/webp/f54bc6c2bcd967b79ffda4e28acddaf5.jpg.webp","https://optim.tildacdn.com/stor3230-3536-4562-b062-613261623063/-/contain/780x586/center/center/-/format/webp/fbcf7c3ff35ef2d4f0f55110f7e1eb08.jpg.webp"] },
+        { id: 43, displayNumber: "43", title: "Березовский переулок, 12, кв. 19", address: "Астрахань, Берёзовский переулок, 12", district: "Кировский", rooms: 2, guests: 7, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать, два двуспальных + односпальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Ванна.", nearby: "Театр Оперы и Балета, Парк Аркадия, цирк.", images: ["https://optim.tildacdn.com/stor6431-6334-4238-b462-363262633137/-/format/webp/18643263.jpg.webp","https://optim.tildacdn.com/stor6336-6337-4432-a637-303230343738/-/contain/780x586/center/center/-/format/webp/52504800.jpg.webp","https://optim.tildacdn.com/stor3163-3633-4331-b532-366334353430/-/contain/780x586/center/center/-/format/webp/12937478.jpg.webp","https://optim.tildacdn.com/stor6166-3239-4932-a239-346333643039/-/contain/780x584/center/center/-/format/webp/76883060.jpg.webp"] },
+        { id: 45, displayNumber: "45", title: "Бакинская 92, кв. 20", address: "Астрахань, Бакинская улица, 92", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + две односпальных. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Ванна. Рабочие места.", nearby: "Собор Святого Владимира, Кремль 7 мин на авто.", images: ["https://optim.tildacdn.com/stor6664-6235-4330-b962-653437613062/-/format/webp/81637719.jpg.webp","https://optim.tildacdn.com/stor3039-3061-4461-b332-613466616162/-/contain/780x584/center/center/-/format/webp/91778390.jpg.webp","https://optim.tildacdn.com/stor3665-3031-4464-b535-643931373361/-/contain/780x586/center/center/-/format/webp/64343235.jpg.webp","https://optim.tildacdn.com/stor3663-3133-4436-b139-343630616465/-/contain/780x584/center/center/-/format/webp/57190712.jpg.webp"] },
+        { id: 46, displayNumber: "46", title: "Бакинская 92, кв. 136", address: "Астрахань, Бакинская улица, 92", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Ванна.", nearby: "Собор Святого Владимира, Кремль 7 мин на авто.", images: ["https://optim.tildacdn.com/stor6266-3237-4332-a336-663930663935/-/format/webp/11816116.jpg.webp","https://optim.tildacdn.com/stor3331-3334-4862-b965-666563383763/-/contain/780x586/center/center/-/format/webp/37655951.jpg.webp","https://optim.tildacdn.com/stor3361-6364-4037-a533-313838383930/-/format/webp/51548394.jpg.webp","https://optim.tildacdn.com/stor3136-3136-4137-a162-653833306334/-/format/webp/23206470.jpg.webp"] },
+        { id: 47, displayNumber: "47", title: "пл. Декабристов, 7, кв. 65", address: "Астрахань, площадь Декабристов, 7", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Сад велосипедистов, Набережная 1 Мая.", images: ["https://optim.tildacdn.com/stor3039-6163-4231-b830-396135333436/-/format/webp/72376448.jpg.webp","https://optim.tildacdn.com/stor3430-6562-4536-b136-363535383935/-/contain/780x586/center/center/-/format/webp/86329222.jpg.webp","https://optim.tildacdn.com/stor3765-3335-4132-b438-623963633062/-/contain/780x586/center/center/-/format/webp/90999566.jpg.webp","https://optim.tildacdn.com/stor3430-3934-4762-a661-343165336139/-/contain/780x586/center/center/-/format/webp/95593643.jpg.webp"] },
+        { id: 48, displayNumber: "48", title: "Николая Островского 55, кв. 19", address: "Астрахань, улица Николая Островского, 55", district: "Советский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Парк Дружбы, ТЦ Алимпик, Собор Святого Владимира.", images: ["https://optim.tildacdn.com/stor3935-6330-4239-b365-393836386130/-/contain/780x586/center/center/-/format/webp/26536052.jpg.webp","https://optim.tildacdn.com/stor3065-3734-4161-a635-666335326264/-/contain/780x586/center/center/-/format/webp/53204511.jpg.webp","https://optim.tildacdn.com/stor6539-3564-4163-a433-613733633838/-/contain/780x586/center/center/-/format/webp/94142534.jpg.webp","https://optim.tildacdn.com/stor6335-3633-4661-b361-666136326637/-/contain/780x586/center/center/-/format/webp/58265872.jpg.webp"] },
+        { id: 49, displayNumber: "49", title: "Трофимова 7Ак1, кв. 71", address: "Астрахань, ул. Трофимова, 7Ак1", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Душевая.", nearby: "Собор Святого Владимира, ТЦ Alimpic, набережная.", images: ["https://static3.tildacdn.com/stor3866-6130-4636-a130-363961353164/86799455.jpg","https://static3.tildacdn.com/stor3865-3239-4838-b137-666637383862/66414291.jpg","https://static3.tildacdn.com/stor3132-3834-4932-b865-336635623462/25884047.jpg","https://static3.tildacdn.com/stor3135-3931-4861-b937-373936386261/13108629.jpg"] },
+        { id: 50, displayNumber: "50", title: "Ахшарумова 25, кв. 126", address: "Астрахань, улица Ахшарумова, 25", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Аллея для прогулок, ТЦ Alimpic, Парк Дружбы.", images: ["https://optim.tildacdn.com/stor3039-3066-4366-a439-396236663865/-/format/webp/53174348.jpg.webp","https://optim.tildacdn.com/stor6233-3764-4663-b530-306636303931/-/contain/780x586/center/center/-/format/webp/88580046.jpg.webp","https://optim.tildacdn.com/stor3032-6261-4161-b734-333035363436/-/contain/780x584/center/center/-/format/webp/42493153.jpg.webp","https://optim.tildacdn.com/stor3962-6334-4536-b533-656561333065/-/contain/780x584/center/center/-/format/webp/26703426.jpg.webp"] },
+        { id: 51, displayNumber: "51", title: "Ахшарумова 25, кв 188", address: "Астрахань, улица Ахшарумова, 25", district: "Кировский", rooms: 1, guests: 2, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Душевая.", nearby: "Аллея для прогулок, ТЦ Alimpic, Парк Дружбы.", images: ["https://optim.tildacdn.com/stor6335-3834-4365-b930-643530376564/-/format/webp/585b2a8b071823233a65d8e7211df7bf.jpg.webp","https://optim.tildacdn.com/stor3631-6364-4363-b636-386663656137/-/contain/780x586/center/center/-/format/webp/22b24b6e663825180f4a4b09efd973e6.jpg.webp","https://optim.tildacdn.com/stor3838-3734-4263-b264-633836613932/-/contain/780x586/center/center/-/format/webp/364f9a89058ad4f0da3282db2590bd0b.jpg.webp","https://optim.tildacdn.com/stor6265-6230-4530-a431-326130656465/-/contain/780x586/center/center/-/format/webp/cbbc8b1aae8e1051bb94c2bafbf0a6ca.jpg.webp"] },
+        { id: 52, displayNumber: "52", title: "Ахшарумова 25, кв. 199", address: "Астрахань, Ахшарумова 25", district: "Кировский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Ванна.", nearby: "Аллея для прогулок, ТЦ Alimpic, Парк Дружбы.", images: ["https://optim.tildacdn.com/stor3263-3762-4130-b036-333631383736/-/format/webp/729d33ad715733e632976ee9595e50b1.jpg.webp","https://optim.tildacdn.com/stor3837-3063-4233-a537-653462363339/-/format/webp/62cf3f3d779819e728838d62b9eea433.jpg.webp","https://optim.tildacdn.com/stor6231-6564-4366-b830-343734363030/-/contain/780x586/center/center/-/format/webp/00d3ebb5b1059137a5750af9487374ae.jpg.webp","https://optim.tildacdn.com/stor6139-3963-4161-b366-663065353838/-/contain/780x586/center/center/-/format/webp/b5facbe668d68c62d4be8696f6de50d6.jpg.webp"] },
+        { id: 53, displayNumber: "53", title: "Ахшарумова, 29, кв. 142", address: "Астрахань, ул. Ахшарумова, 29", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Аллея для прогулок, ТЦ Alimpic, Парк Дружбы.", images: ["https://optim.tildacdn.com/stor3464-3637-4230-a337-313834346365/-/contain/780x586/center/center/-/format/webp/12858307.jpg.webp","https://optim.tildacdn.com/stor6333-3435-4837-b532-376261373937/-/contain/780x584/center/center/-/format/webp/16117820.jpg.webp","https://optim.tildacdn.com/stor3535-6565-4465-a433-346232333937/-/contain/780x584/center/center/-/format/webp/65768815.jpg.webp","https://optim.tildacdn.com/stor6562-6636-4364-a662-613631393736/-/contain/780x584/center/center/-/format/webp/85814386.jpg.webp"] },
+        { id: 54, displayNumber: "54", title: "Генерала Епишева, 65, кв. 56", address: "Астрахань, ул. Генерала Епишева, 65", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Две двуспальных кровати. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Зоопарк Баба Фрося, Собор Святого Князя Владимира.", images: ["https://optim.tildacdn.com/stor3234-3362-4037-a537-313831393432/-/format/webp/88529265.jpg.webp","https://optim.tildacdn.com/stor3333-6337-4965-a337-373737653830/-/contain/780x586/center/center/-/format/webp/88629806.jpg.webp","https://optim.tildacdn.com/stor3531-3161-4337-b632-393530353562/-/contain/780x584/center/center/-/format/webp/33149568.jpg.webp","https://optim.tildacdn.com/stor6537-6432-4530-a366-633763653330/-/contain/780x586/center/center/-/format/webp/51116490.jpg.webp","https://optim.tildacdn.com/stor6566-6238-4166-b965-396636343739/-/contain/780x586/center/center/-/format/webp/83903059.jpg.webp"] },
+        { id: 55, displayNumber: "55", title: "1-ый Таманский переулок 25, кв. 20", address: "Астрахань, 1-й Таманский переулок, 25", district: "Советский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Центр семейного отдыха Баба Фрося, Собор Святого Владимира.", images: ["https://optim.tildacdn.com/stor3136-3632-4136-a333-373039336435/-/format/webp/ec8b8927bd59cae5ac1a82a8b8dc7129.jpg.webp","https://optim.tildacdn.com/stor3761-3161-4639-a332-646135303061/-/contain/780x586/center/center/-/format/webp/cee48901e8118b78ec4884f5f51600c0.jpg.webp","https://optim.tildacdn.com/stor3766-6334-4266-b239-343762306466/-/contain/780x586/center/center/-/format/webp/5a2d712ff03c457666cf41a8c7150fc1.jpg.webp","https://optim.tildacdn.com/stor6431-6438-4863-a534-356231393632/-/contain/780x586/center/center/-/format/webp/96f969951d80266b0be6d219bf0b088e.jpg.webp"] },
+        { id: 56, displayNumber: "56", title: "1-ый Таманский переулок 25, кв. 93", address: "Астрахань, 1-й Таманский переулок, 25", district: "Советский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Ванна.", nearby: "Центр семейного отдыха Баба Фрося, Собор Святого Владимира.", images: ["https://optim.tildacdn.com/stor6464-6366-4830-a666-623833363337/-/format/webp/44316178.jpg.webp","https://optim.tildacdn.com/stor3230-3438-4165-b961-316334313766/-/contain/780x586/center/center/-/format/webp/54759518.jpg.webp","https://optim.tildacdn.com/stor3064-3132-4362-b837-353330353061/-/contain/780x584/center/center/-/format/webp/19099102.jpg.webp","https://optim.tildacdn.com/stor3261-3434-4766-a132-313933343864/-/contain/780x584/center/center/-/format/webp/90425090.jpg.webp"] },
+        { id: 57, displayNumber: "57", title: "1-ый Таманский переулок 25, кв. 146", address: "Астрахань, 1-й Таманский переулок, 25", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Центр семейного отдыха Баба Фрося, Собор Святого Владимира.", images: ["https://optim.tildacdn.com/stor3232-3962-4663-b732-613036323362/-/format/webp/4c286adaf6da9a83a2c3c8c24efc87aa.jpg.webp","https://optim.tildacdn.com/stor3235-6261-4939-b662-623230336638/-/contain/780x586/center/center/-/format/webp/4759d3f0747cbae5a21d86aa3477dc4d.jpg.webp","https://optim.tildacdn.com/stor3333-3363-4265-b162-396564646565/-/contain/780x586/center/center/-/format/webp/aa4e38879f7e15563ee9b2435529e5ea.jpg.webp","https://optim.tildacdn.com/stor6434-3766-4266-a462-363132316432/-/format/webp/cabe0939d4aa00ff7246178809dc39f4.jpg.webp"] },
+        { id: 58, displayNumber: "58", title: "Автомобильная 8, кв. 129", address: "Астрахань, Автомобильная 8", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Центр семейного отдыха Баба Фрося, Собор Святого Владимира.", images: ["https://optim.tildacdn.com/stor6337-6438-4831-a665-333865346265/-/format/webp/24147952.jpg.webp","https://optim.tildacdn.com/stor3839-6564-4637-b830-643737336162/-/contain/780x438/center/center/-/format/webp/50941224.jpg.webp","https://optim.tildacdn.com/stor3761-6137-4730-b936-333335313931/-/contain/780x438/center/center/-/format/webp/28514654.jpg.webp","https://optim.tildacdn.com/stor6165-3431-4334-b138-333839666634/-/contain/780x438/center/center/-/format/webp/47755272.jpg.webp"] },
+        { id: 59, displayNumber: "59", title: "Автомобильная, 8, кв. 202", address: "Астрахань, Автомобильная 8", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Центр семейного отдыха Баба Фрося, Собор Святого Владимира.", images: ["https://optim.tildacdn.com/stor3162-3261-4133-b737-633730663735/-/format/webp/98221039.jpg.webp","https://optim.tildacdn.com/stor6364-3036-4432-a531-663037323863/-/contain/780x586/center/center/-/format/webp/79740743.jpg.webp","https://optim.tildacdn.com/stor3537-3230-4130-a534-373565386434/-/contain/780x584/center/center/-/format/webp/28194226.jpg.webp","https://optim.tildacdn.com/stor3931-3633-4061-a637-623334396231/-/contain/780x584/center/center/-/format/webp/23429773.jpg.webp"] },
+        { id: 60, displayNumber: "60", title: "Автомобильная, 8, кв 208", address: "Астрахань, Автомобильная улица, 8", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Центр семейного отдыха Баба Фрося, Собор Святого Владимира.", images: ["https://optim.tildacdn.com/stor6431-3434-4233-a462-363666306532/-/format/webp/72242941.jpg.webp","https://optim.tildacdn.com/stor3734-6136-4461-a536-656533383339/-/contain/780x586/center/center/-/format/webp/45790685.jpg.webp","https://optim.tildacdn.com/stor6438-3233-4632-b065-366361666365/-/contain/780x586/center/center/-/format/webp/95906650.jpg.webp","https://optim.tildacdn.com/stor3866-6461-4265-b832-633564643338/-/contain/780x584/center/center/-/format/webp/92558482.jpg.webp"] },
+        { id: 61, displayNumber: "61", title: "пер. Островского 22, кв. 52", address: "Астрахань, переулок Островского 22", district: "Советский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Парк Дружба, планетарий, Собор Святого Князя Владимира.", images: ["https://optim.tildacdn.com/stor3761-6361-4534-b362-313235363436/-/format/webp/16445561.jpg.webp","https://optim.tildacdn.com/stor3331-3164-4464-a363-333364613639/-/contain/780x586/center/center/-/format/webp/95008472.jpg.webp","https://optim.tildacdn.com/stor6438-3263-4837-b431-663435373335/-/contain/780x584/center/center/-/format/webp/70464406.jpg.webp","https://optim.tildacdn.com/stor3534-3332-4830-b134-313163343532/-/contain/780x586/center/center/-/format/webp/77764810.jpg.webp"] },
+        { id: 62, displayNumber: "62", title: "Васильковая 7, кв. 122", address: "Астрахань, ул. Васильковая, 7", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Душевая.", nearby: "Центр семейного отдыха Баба Фрося, Собор Святого Владимира.", images: ["https://static3.tildacdn.com/stor6537-3065-4234-b435-653931373139/63866968.jpg","https://static3.tildacdn.com/stor3932-3437-4166-b733-373133666133/67024516.jpg","https://static3.tildacdn.com/stor3431-3433-4530-a134-356639353336/75576084.jpg","https://static3.tildacdn.com/stor6464-3937-4130-b838-633566346363/66058113.jpg"] },
+        { id: 63, displayNumber: "63", title: "Васильковая 7, кв. 123", address: "Астрахань, Васильковая улица, 7", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Душевая.", nearby: "Центр семейного отдыха Баба Фрося, Собор Святого Владимира.", images: ["https://optim.tildacdn.com/stor6333-3462-4139-a236-393163353035/-/format/webp/63248774.jpg.webp","https://optim.tildacdn.com/stor3237-6234-4634-b566-356335356463/-/contain/780x586/center/center/-/format/webp/90077807.jpg.webp","https://optim.tildacdn.com/stor6163-3830-4538-b637-636632323135/-/contain/780x584/center/center/-/format/webp/53803380.jpg.webp","https://optim.tildacdn.com/stor3831-3634-4938-a138-633163373765/-/contain/780x584/center/center/-/format/webp/63262785.jpg.webp"] },
+        { id: 64, displayNumber: "64", title: "Васильковая 7, кв. 171", address: "Астрахань, ул. Васильковая, 7", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Ванна.", nearby: "Центр семейного отдыха Баба Фрося, Собор Святого Владимира.", images: ["https://static3.tildacdn.com/stor3465-3636-4338-a534-353630653938/87974317.jpg","https://static3.tildacdn.com/stor6464-6264-4162-a532-663861666631/46005762.jpg","https://static3.tildacdn.com/stor3633-3334-4530-b863-646466653438/61524598.jpg","https://static3.tildacdn.com/stor6630-3035-4965-b131-633063343437/95910371.jpg"] },
+        { id: 65, displayNumber: "65", title: "Бехтерева 2А, кв. 36", address: "Астрахань, улица Бехтерева, 2А", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита+духовка, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://optim.tildacdn.com/stor3162-6661-4438-b364-613064393230/-/format/webp/87625780.jpg.webp","https://optim.tildacdn.com/stor3137-6333-4664-b038-633465633265/-/contain/780x584/center/center/-/format/webp/50906797.jpg.webp","https://optim.tildacdn.com/stor6136-3134-4539-a539-343438316562/-/contain/780x586/center/center/-/format/webp/42187386.jpg.webp","https://optim.tildacdn.com/stor3364-6639-4931-a435-393036313139/-/contain/780x586/center/center/-/format/webp/89892320.jpg.webp"] },
+        { id: 66, displayNumber: "66", title: "Бехтерева 2А, кв. 183", address: "Астрахань, ул. Бехтерева, 2А", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://optim.tildacdn.com/stor6531-3365-4132-a139-353038643166/-/format/webp/40228830.jpg.webp","https://optim.tildacdn.com/stor3663-3764-4132-b434-633833643566/-/contain/780x584/center/center/-/format/webp/38119566.jpg.webp","https://optim.tildacdn.com/stor6232-3731-4433-a539-356335646162/-/contain/780x584/center/center/-/format/webp/49735928.jpg.webp","https://optim.tildacdn.com/stor6539-3034-4432-b865-646563346465/-/contain/780x584/center/center/-/format/webp/90327041.jpg.webp"] },
+        { id: 67, displayNumber: "67", title: "Бехтерева, 2А, кв. 256", address: "Астрахань, Бехтерева 2а", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://static3.tildacdn.com/stor3231-6466-4133-a465-326161373038/32d8dd5e1ec5894bf2be06577610d94c.jpg","https://static3.tildacdn.com/stor6561-6237-4665-b263-383163336132/1e4e04e7331e2338779da847e9194c9e.jpg","https://static3.tildacdn.com/stor3239-3431-4566-b036-643034326463/6f2590aa4211fa10026d32182b7bb1d3.jpg","https://static3.tildacdn.com/stor6434-3363-4963-b331-326130386665/d93ed6410edbb093be3d05d79ebf5eae.jpg"] },
+        { id: 68, displayNumber: "68", title: "Бехтерева, 2Б, кв. 59", address: "Астрахань, улица Бехтерева, 2Б", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://optim.tildacdn.com/stor3761-6532-4239-a665-633431396437/-/contain/780x586/center/center/-/format/webp/66641665.jpg.webp","https://optim.tildacdn.com/stor6437-3235-4761-b361-353566316339/-/contain/780x586/center/center/-/format/webp/64760780.jpg.webp","https://optim.tildacdn.com/stor3338-3030-4934-b335-393933343635/-/contain/780x586/center/center/-/format/webp/56133085.jpg.webp","https://optim.tildacdn.com/stor6239-6435-4336-b132-323334393638/-/contain/780x586/center/center/-/format/webp/50163294.jpg.webp"] },
+        { id: 69, displayNumber: "69", title: "Бехтерева 2Б, кв. 243", address: "Астрахань, ул. Бехтерева, 2Б", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Душевая.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://static3.tildacdn.com/stor3430-6630-4764-a138-353963376161/24274889.jpg","https://static3.tildacdn.com/stor3033-3034-4761-b333-643831626331/32167053.jpg","https://static3.tildacdn.com/stor3264-6566-4430-b432-393539663134/57307558.jpg","https://static3.tildacdn.com/stor3061-3963-4539-a432-643536636361/25727226.jpg"] },
+        { id: 70, displayNumber: "70", title: "Бехтерева, 2Б, кв. 187", address: "Астрахань, улица Бехтерева, 2Б", district: "Советский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://static3.tildacdn.com/stor6436-6364-4365-b637-636238333632/2ea1c9e09728d0345d6656a33805a2d1.jpg","https://static3.tildacdn.com/stor3635-6239-4938-b066-663837613236/cf1821617645f23a2fc227e61015bb72.jpg","https://static3.tildacdn.com/stor6562-6136-4566-b034-653136386236/53df6f07118bceb2bc9103284757a9b8.jpg","https://static3.tildacdn.com/stor3234-6431-4432-b435-323361396134/c81fda9faf2f1ac5a3c04714c70b059a.jpg"] },
+        { id: 71, displayNumber: "71", title: "Бехтерева 2Б, кв. 259", address: "Астрахань, ул. Бехтерева, 2Б", district: "Советский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Душевая.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://optim.tildacdn.com/stor6438-6463-4663-b431-366334393161/-/format/webp/83440905.jpg.webp","https://optim.tildacdn.com/stor3262-3636-4231-a233-643065663266/-/contain/780x586/center/center/-/format/webp/19735259.jpg.webp","https://optim.tildacdn.com/stor3833-6339-4637-b534-326166326231/-/contain/780x586/center/center/-/format/webp/19870732.jpg.webp","https://optim.tildacdn.com/stor3864-6162-4538-b934-633861666534/-/contain/780x586/center/center/-/format/webp/41058194.jpg.webp"] },
+        { id: 72, displayNumber: "72", title: "Бехтерева 2Б, кв. 267", address: "Астрахань, ул. Бехтерева, 2Б", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Душевая.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://optim.tildacdn.com/stor3131-3937-4463-b364-623361353561/-/format/webp/65569296.jpg.webp","https://optim.tildacdn.com/stor6265-3864-4564-a538-306431613537/-/contain/780x586/center/center/-/format/webp/73435017.jpg.webp","https://optim.tildacdn.com/stor3262-6232-4233-b732-646336363934/-/contain/780x586/center/center/-/format/webp/32655649.jpg.webp","https://optim.tildacdn.com/stor3361-6563-4430-b531-386534316234/-/contain/780x586/center/center/-/format/webp/30948755.jpg.webp"] },
+        { id: 73, displayNumber: "73", title: "Бехтерева 2Б, кв. 278", address: "Астрахань, ул. Бехтерева, 2Б", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://static3.tildacdn.com/stor3266-3963-4066-b633-653238623635/40995853.jpg","https://static3.tildacdn.com/stor6331-3233-4265-b131-343465376635/18003585.jpg","https://static3.tildacdn.com/stor6564-3538-4465-a139-383834333135/25457753.jpg","https://static3.tildacdn.com/stor3364-6665-4031-b064-343235323533/78483437.jpg"] },
+        { id: 74, displayNumber: "74", title: "Бехтерева 2Б, кв. 343", address: "Астрахань, ул. Бехтерева, 2Б", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://optim.tildacdn.com/stor6162-6233-4332-a139-303962386562/-/format/webp/30877629.jpg.webp","https://optim.tildacdn.com/stor3034-3638-4436-b036-626337316361/-/contain/780x586/center/center/-/format/webp/72743424.jpg.webp","https://optim.tildacdn.com/stor3063-3736-4537-b931-663961396138/-/contain/780x586/center/center/-/format/webp/24408581.jpg.webp","https://optim.tildacdn.com/stor3733-6239-4566-b961-666565663161/-/format/webp/78653643.jpg.webp"] },
+        { id: 75, displayNumber: "75", title: "Бехтерева 2Б, кв. 371", address: "Астрахань, улица Бехтерева, 2Б", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://optim.tildacdn.com/stor6566-3434-4166-b364-326134626164/-/contain/780x586/center/center/-/format/webp/9f9ce1934022e63621617489d2e58d3b.jpg.webp","https://optim.tildacdn.com/stor3532-6563-4530-a338-616666613030/-/contain/780x586/center/center/-/format/webp/ccf4028fdc9e9c3dcd38841b632fb9ec.jpg.webp","https://optim.tildacdn.com/stor3039-3865-4535-b232-373534636235/-/contain/780x586/center/center/-/format/webp/936d5ea4357dadeaa2df8027485c4d93.jpg.webp","https://optim.tildacdn.com/stor3636-3166-4134-b565-626264633833/-/contain/780x586/center/center/-/format/webp/dc571f9d2c859cf34de9dd2c329ea7ac.jpg.webp"] },
+        { id: 76, displayNumber: "76", title: "Бехтерева 2Б, кв. 390", address: "Астрахань, Ул. Бехтерева 2б, кв. 390", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Душевая.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://optim.tildacdn.com/stor6165-3265-4365-a530-636634323135/-/contain/780x584/center/center/-/format/webp/25466091.jpg.webp","https://optim.tildacdn.com/stor3134-6233-4264-b031-663237353264/-/format/webp/32696901.jpg.webp","https://optim.tildacdn.com/stor3666-6162-4365-a362-313833376438/-/contain/780x586/center/center/-/format/webp/34913219.jpg.webp","https://optim.tildacdn.com/stor6438-3466-4664-a135-376433343265/-/contain/780x584/center/center/-/format/webp/86195520.jpg.webp"] },
+        { id: 77, displayNumber: "77", title: "Бехтерева 2Б, кв. 402", address: "Астрахань, Бехтерева 2Б, кв. 402", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Душевая.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://optim.tildacdn.com/stor3134-3061-4733-a537-363936633835/-/format/webp/19487874.jpg.webp","https://optim.tildacdn.com/stor3263-6166-4365-b363-336239306430/-/contain/780x488/center/center/-/format/webp/28351747.jpg.webp","https://optim.tildacdn.com/stor3661-3132-4636-b039-326535626264/-/contain/780x486/center/center/-/format/webp/43492678.jpg.webp","https://optim.tildacdn.com/stor6638-3136-4232-a563-396134633462/-/contain/780x488/center/center/-/format/webp/32057287.jpg.webp"] },
+        { id: 78, displayNumber: "78", title: "Бехтерева 2Б, кв. 446", address: "Астрахань, Бехтерева 2Б", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Ванна.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://static3.tildacdn.com/stor3566-3563-4362-b463-666533346463/91311709.jpg","https://static3.tildacdn.com/stor6266-3561-4565-b735-303566663338/14398875.jpg","https://static3.tildacdn.com/stor3536-3064-4230-a539-373737643963/11415973.jpg","https://static3.tildacdn.com/stor3630-6335-4064-a134-663533376330/47665935.jpg"] },
+        { id: 79, displayNumber: "79", title: "Бехтерева 2Б, кв. 463", address: "Астрахань, Бехтерева 2б", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Душевая.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://optim.tildacdn.com/stor6665-3331-4439-a561-373634643133/-/format/webp/48705947.jpg.webp","https://optim.tildacdn.com/stor3031-3330-4730-b134-336135383764/-/format/webp/36571867.jpg.webp","https://optim.tildacdn.com/stor3363-3538-4435-a336-383030326232/-/contain/780x586/center/center/-/format/webp/54127845.jpg.webp","https://optim.tildacdn.com/stor3962-6333-4535-b638-343631326631/-/contain/780x586/center/center/-/format/webp/45202092.jpg.webp"] },
+        { id: 80, displayNumber: "80", title: "Бехтерева 2В, кв. 141", address: "Астрахань, улица Бехтерева, 2В", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://static.tildacdn.com/stor3738-6562-4437-a164-643834376133/ddfe2ae175f8449dad827aaa4ff25067.jpg","https://static.tildacdn.com/stor3333-6231-4264-a638-323638323034/235ff84b6b44a6b932544dacee2e985d.jpg","https://static.tildacdn.com/stor3934-3637-4365-a262-666435643861/4144c73b4492ff862a2476e4d49d2152.jpg","https://static.tildacdn.com/stor3963-6566-4031-b566-366231303336/8597ff4b682531ddedcde1c6480895fa.jpg"] },
+        { id: 81, displayNumber: "81", title: "Бехтерева 2В, кв. 272", address: "Астрахань, улица Бехтерева, 2В", district: "Советский", rooms: 2, guests: 3, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + односпальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://optim.tildacdn.com/stor3830-3432-4336-a238-386131306238/-/format/webp/83993251.jpg.webp","https://optim.tildacdn.com/stor3765-3337-4331-b934-313161363033/-/contain/780x586/center/center/-/format/webp/96511257.jpg.webp","https://optim.tildacdn.com/stor3565-3334-4933-b161-313266613236/-/contain/780x584/center/center/-/format/webp/32859708.jpg.webp","https://optim.tildacdn.com/stor6461-6331-4338-b963-366233383465/-/contain/780x584/center/center/-/format/webp/25761162.jpg.webp"] },
+        { id: 82, displayNumber: "82", title: "Бехтерева 2В, кв. 382", address: "Астрахань, улица Бехтерева, 2В", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://static3.tildacdn.com/stor6166-3162-4765-b538-643264346239/40819169e8ead25056445c2f27704f7c.jpg","https://static3.tildacdn.com/stor3238-3264-4630-b533-363437363761/8b7368b08fd803f66737aafc37eecbb0.jpg","https://static3.tildacdn.com/stor3864-3135-4533-a236-383436303836/414d80fbb31841ef613ffd176210cc69.jpg","https://static3.tildacdn.com/stor3965-3836-4636-a331-376363386434/6fe1310a29d6451a33f63917038351dc.jpg"] },
+        { id: 83, displayNumber: "83", title: "Бехтерева 2В, кв. 431", address: "Астрахань, улица Бехтерева, 2В", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://static3.tildacdn.com/stor6632-3433-4639-b061-613836356438/15ffbfb7e8f5f801a6d5070ecf73b15d.jpg","https://static3.tildacdn.com/stor3736-3639-4930-b230-373764373830/4bcda8402876585211a8586ec5ca9d0e.jpg","https://static3.tildacdn.com/stor3735-3763-4364-b436-353532373332/8d67c20276b5dadc938a27e6daa0fbe2.jpg","https://static3.tildacdn.com/stor6637-6562-4336-b134-613334666366/041df42223f4f89e1371db9dd0183ed0.jpg"] },
+        { id: 84, displayNumber: "84", title: "НПЗ 22, кв. 17", address: "Астрахань, улица Набережная Приволжского Затона, 22", district: "Советский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 6 мин на авто.", images: ["https://optim.tildacdn.com/stor3935-3465-4631-b231-643037393231/-/format/webp/165fb385166daa755eb9e77a81661ded.jpg.webp","https://optim.tildacdn.com/stor3534-3865-4461-b531-373136623635/-/contain/780x586/center/center/-/format/webp/9bcb9ac906980b374ad69bdab63d5a2e.jpg.webp","https://optim.tildacdn.com/stor3362-3132-4135-b566-356631643237/-/contain/780x586/center/center/-/format/webp/875f46e76759cc286e2f6698b79eee6f.jpg.webp","https://optim.tildacdn.com/stor3833-3264-4264-b764-376434333361/-/contain/780x586/center/center/-/format/webp/cd863190bebace8efc0d445142b2a5c9.jpg.webp"] },
+        { id: 85, displayNumber: "85", title: "НПЗ 22, кв. 52", address: "Астрахань, ул. Набережная Приволжского Затона, 22", district: "Советский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 6 мин на авто.", images: ["https://static3.tildacdn.com/stor6230-6538-4431-a261-636535383566/46678698.jpg","https://static3.tildacdn.com/stor3838-3066-4466-b764-373164623731/82502140.jpg","https://static3.tildacdn.com/stor3761-3062-4533-b934-333265343263/92310228.jpg","https://static3.tildacdn.com/stor6635-6338-4236-b636-323735633465/58422738.jpg"] },
+        { id: 86, displayNumber: "86", title: "НПЗ 22А, кв. 13", address: "Астрахань, улица Набережная Приволжского Затона, 22А", district: "Советский", rooms: 1, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 6 мин на авто.", images: ["https://optim.tildacdn.com/stor6163-6466-4464-b064-363638316162/-/format/webp/40795801.jpg.webp","https://optim.tildacdn.com/stor6362-6164-4463-b135-373837316135/-/contain/780x1040/center/center/-/format/webp/70624105.jpg.webp","https://optim.tildacdn.com/stor3663-3366-4137-b562-613438343638/-/contain/780x1040/center/center/-/format/webp/28398020.jpg.webp","https://optim.tildacdn.com/stor3761-3437-4231-a564-656538393939/-/contain/780x1040/center/center/-/format/webp/88238376.jpg.webp","https://optim.tildacdn.com/stor3765-3331-4566-b761-303264343062/-/contain/780x1040/center/center/-/format/webp/46287996.jpg.webp"] },
+        { id: 87, displayNumber: "87", title: "НПЗ 22А, кв. 76", address: "Астрахань, ул. Набережная Приволжского Затона, 22А", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Душевая.", nearby: "Набережная у дома, Кремль 6 мин на авто.", images: ["https://optim.tildacdn.com/stor3830-6134-4465-b630-633038613738/-/format/webp/89083173.jpg.webp","https://optim.tildacdn.com/stor3937-3833-4366-a464-636464613761/-/contain/780x586/center/center/-/format/webp/58437713.jpg.webp","https://optim.tildacdn.com/stor3132-3231-4637-b232-636664623838/-/contain/780x586/center/center/-/format/webp/20840469.jpg.webp","https://optim.tildacdn.com/stor3032-6433-4235-b966-343062306362/-/contain/780x586/center/center/-/format/webp/33462637.jpg.webp"] },
+        { id: 88, displayNumber: "88", title: "НПЗ 24, кв. 159", address: "Астрахань, улица Набережная Приволжского Затона, 24", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 6 мин на авто.", images: ["https://static.tildacdn.com/stor3738-3831-4566-b365-326630366363/15813828.jpg","https://static.tildacdn.com/stor3764-3564-4964-b164-666339656138/43441618.jpg","https://static.tildacdn.com/stor3866-3431-4465-b637-613461666431/46503674.jpg","https://static.tildacdn.com/stor6365-6436-4336-b239-613361616637/45810343.jpg"] },
+        { id: 89, displayNumber: "89", title: "НПЗ 45, кв. 69", address: "Астрахань, ул. Набережная Приволжского Затона, 45", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Вейк парк, ТЦ Alimpic, зоопарк Баба Фрося.", images: ["https://optim.tildacdn.com/stor6337-6438-4831-a665-333865346265/-/format/webp/24147952.jpg.webp","https://optim.tildacdn.com/stor3839-6564-4637-b830-643737336162/-/contain/780x438/center/center/-/format/webp/50941224.jpg.webp","https://optim.tildacdn.com/stor3761-6137-4730-b936-333335313931/-/contain/780x438/center/center/-/format/webp/28514654.jpg.webp","https://optim.tildacdn.com/stor6165-3431-4334-b138-333839666634/-/contain/780x438/center/center/-/format/webp/47755272.jpg.webp"] },
+        { id: 90, displayNumber: "90", title: "пл. Ленина 10, кв. 9", address: "Астрахань, площадь Ленина, 10", district: "Кировский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Сад велосипедистов, Набережная 1 Мая, Братский сад, Кремль 2 мин.", images: ["https://optim.tildacdn.com/stor3662-3233-4635-b535-313235396231/-/format/webp/536a96c6813a6e7e84bfddd4cdca8a93.jpg.webp","https://optim.tildacdn.com/stor3535-6165-4564-b663-363630626133/-/contain/780x586/center/center/-/format/webp/c91a5035c9b4ea4bbb0e0ef7eb3fcaf6.jpg.webp","https://optim.tildacdn.com/stor3331-6462-4137-b666-306639393432/-/contain/780x586/center/center/-/format/webp/438ff00783f4ce62b88585aaf6ca11f7.jpg.webp","https://optim.tildacdn.com/stor6333-3737-4664-b538-333163653463/-/contain/780x586/center/center/-/format/webp/94114394eb124d25ff997ec37b713a2f.jpg.webp"] },
+        { id: 91, displayNumber: "91", title: "Гоголя 3к1, кв. 63", address: "Астрахань, улица Гоголя, 3к1", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Ванна.", nearby: "Собор Святого Владимира, ТЦ Alimpic, набережная.", images: ["https://optim.tildacdn.com/stor3832-6264-4535-b866-353039613664/-/format/webp/305283ac679c1bc0d29fb4dfdb48f01e.jpg.webp","https://optim.tildacdn.com/stor3738-6536-4362-b832-613131363436/-/format/webp/15de9c86c5245b4634b87610e8970fd9.jpg.webp","https://optim.tildacdn.com/stor6537-6432-4336-b337-363938333937/-/contain/780x586/center/center/-/format/webp/213102fd2779244a572f7ad2759d733f.jpg.webp","https://optim.tildacdn.com/stor6438-3861-4238-b263-666465376236/-/contain/780x586/center/center/-/format/webp/8fbb177ad8a5e011d5fc88b97ca97f61.jpg.webp"] },
+        { id: 93, displayNumber: "93", title: "НПЗ 45, кв. 84", address: "Астрахань, Ул. Набережная Приволжского Затона 45", district: "Советский", rooms: 3, guests: 6, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Две двуспальных кровати + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Вейк парк, ТЦ Alimpic, зоопарк Баба Фрося.", images: ["https://static3.tildacdn.com/stor6664-3532-4562-b766-376462633236/38268645.jpg","https://static3.tildacdn.com/stor6264-3863-4131-a135-636161373139/86145240.jpg","https://static3.tildacdn.com/stor3665-3266-4439-b264-633032316261/42126891.jpg","https://static3.tildacdn.com/stor6331-6665-4464-b761-636239393231/34312375.jpg","https://static3.tildacdn.com/stor6366-3431-4038-b837-666661303434/88367961.jpg"] },
+        { id: 94, displayNumber: "94", title: "Трофимова 10, кв. 202", address: "Астрахань, улица Трофимова, 10", district: "Советский", rooms: 3, guests: 6, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Две двуспальных кровати + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Душевая.", nearby: "Собор Святого Владимира, ТЦ Alimpic, набережная.", images: ["https://static3.tildacdn.com/stor3934-6437-4262-a262-383538313830/2bd09f78cea03a0c5f3524b8286e7e36.jpg","https://static3.tildacdn.com/stor3163-3965-4461-b437-636434653066/a46e92c80d55a529997a92e65999c1c0.jpg","https://static3.tildacdn.com/stor3830-6438-4630-b062-626537393132/d1fefc04a46d3df86b27c332ac207bb6.jpg","https://static3.tildacdn.com/stor6332-6537-4534-b934-326566303339/65aa0efe85602b973eac8c996504619e.jpg","https://static3.tildacdn.com/stor3563-6639-4730-b534-333032666631/97b3f8ba9c75931b8117b3a06a03b45d.jpg"] },
+        { id: 95, displayNumber: "95", title: "Бехтерева 2А, кв. 55", address: "Астрахань, улица Бехтерева, 2А", district: "Советский", rooms: 2, guests: 5, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный и односпальный диваны. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Ванна.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://optim.tildacdn.com/stor6364-6633-4261-b761-656166356164/-/format/webp/53682648.jpg.webp","https://optim.tildacdn.com/stor3534-6565-4431-b863-333435633336/-/contain/780x584/center/center/-/format/webp/90517439.jpg.webp","https://optim.tildacdn.com/stor6638-3363-4430-b339-653830613661/-/contain/780x586/center/center/-/format/webp/27853558.jpg.webp","https://optim.tildacdn.com/stor3566-3665-4039-a365-393231393331/-/contain/780x586/center/center/-/format/webp/71535598.jpg.webp"] },
+        { id: 96, displayNumber: "96", title: "Бехтерева 2А, кв. 179", address: "Астрахань, ул. Бехтерева, 2А", district: "Советский", rooms: 3, guests: 6, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Две двуспальных кровати + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 8 мин на авто, ЖК Атмосфера.", images: ["https://static3.tildacdn.com/stor3164-3531-4162-a534-366366326330/17306523.jpg","https://static3.tildacdn.com/stor3432-3662-4165-b135-613462343832/62327841.jpg","https://static3.tildacdn.com/stor3338-3861-4235-b337-376639316366/66982371.jpg","https://static3.tildacdn.com/stor3561-3262-4430-b238-383330373164/40515942.jpg"] },
+        { id: 97, displayNumber: "97", title: "Ленина 12, кв. 7", address: "Астрахань, пл. Ленина, 12", district: "Кировский", rooms: 3, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Две двуспальные кровати + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Ванна.", nearby: "Сад велосипедистов, Набережная 1 Мая, Братский сад, Кремль 2 мин.", images: ["https://optim.tildacdn.com/stor3734-3439-4161-b561-376134376561/-/format/webp/70507218.jpg.webp","https://optim.tildacdn.com/stor6166-3232-4433-b364-366339383562/-/contain/780x584/center/center/-/format/webp/83825319.jpg.webp","https://optim.tildacdn.com/stor6265-3133-4636-b433-306366326664/-/contain/780x584/center/center/-/format/webp/74562648.jpg.webp","https://optim.tildacdn.com/stor3834-3563-4161-b930-623337633637/-/contain/780x584/center/center/-/format/webp/49971352.jpg.webp"] },
+        { id: 98, displayNumber: "98", title: "Куликова 81к4, кв 61", address: "Астрахань, улица Куликова, 81к4", district: "Кировский", rooms: 3, guests: 5, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Две двуспальные кровати + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник. Ванна.", nearby: "Интерактивный парк WOW Land, ТЦ Три Кота, вокзалы.", images: ["https://optim.tildacdn.com/stor6264-3830-4130-a562-363436623165/-/format/webp/31551537.jpg.webp","https://optim.tildacdn.com/stor6434-6134-4335-a639-366334346666/-/contain/780x584/center/center/-/format/webp/73162187.jpg.webp","https://optim.tildacdn.com/stor3233-3630-4233-b665-343430663435/-/contain/780x584/center/center/-/format/webp/23394788.jpg.webp","https://optim.tildacdn.com/stor3230-3637-4361-b934-336638356662/-/contain/780x584/center/center/-/format/webp/13986292.jpg.webp"] },
+        { id: 99, displayNumber: "99", title: "Мейера 6, кв. 43", address: "Астрахань, ул. Вячеслава мейера, 6", district: "Трусовский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальный диван + две односпальные кровати. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Открытый бассейн Оазис, ТРК Dexter, ДоброБанька.", images: ["https://optim.tildacdn.com/stor3735-3939-4362-b664-306662303931/-/format/webp/86830708.jpg.webp","https://optim.tildacdn.com/stor6231-6232-4135-b431-376465643364/-/contain/780x584/center/center/-/format/webp/97974916.jpg.webp","https://optim.tildacdn.com/stor3732-3036-4237-a466-353962626439/-/contain/780x584/center/center/-/format/webp/99117024.jpg.webp","https://optim.tildacdn.com/stor3039-6237-4132-b062-313066333066/-/contain/780x584/center/center/-/format/webp/18395001.jpg.webp"] },
+        { id: 100, displayNumber: "100", title: "Московская 106, кв. 1", address: "Астрахань, ул. Московская 106", district: "Ленинский", rooms: 4, guests: 10, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Две двуспальные кровати + три двуспальных дивана. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Комсомольская Набережная, сквер 60 лет Сталинградской битвы.", images: ["https://static3.tildacdn.com/stor6437-6562-4565-a530-613936383062/b263a70af36d1afdd31684513d006e67.jpg","https://static3.tildacdn.com/stor6366-3731-4663-a363-663532336666/c6e1bf4732db23e92a683778fce57e21.jpg","https://static3.tildacdn.com/stor3331-3031-4764-b531-613464663237/52c40a742391519ec375640c9c828d0a.jpg","https://static3.tildacdn.com/stor6263-6139-4262-b336-643963626462/cf1031ae370c33b8268f62656d887e3f.jpg"] },
+        // НОВЫЕ КВАРТИРЫ (которых не было в файле)
+        { id: 101, displayNumber: "101", title: "Минусинская 8Г, кв. 124", address: "Астрахань, ул. Минусинская, 8Г", district: "Советский", rooms: 2, guests: 4, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать + двуспальный диван. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Рядом с парком и остановками общественного транспорта.", images: ["https://optim.tildacdn.com/stor3832-3566-4130-b031-613538323762/-/contain/780x586/center/center/-/format/webp/f297f2e459c7b77fbee27e4f5e05feb2.jpg.webp","https://optim.tildacdn.com/stor6135-3931-4337-a134-626165383536/-/contain/780x586/center/center/-/format/webp/d51ed235a1e07d13a05e00739da2b890.jpg.webp","https://optim.tildacdn.com/stor3861-3832-4136-a631-626162363961/-/contain/780x586/center/center/-/format/webp/f4770d897e1e796f1d480bdf6f9e1022.jpg.webp","https://optim.tildacdn.com/stor6662-3533-4930-a362-613536316263/-/contain/780x586/center/center/-/format/webp/c1040b9f8a5939ce5095b4a703de02d5.jpg.webp"] },
+        { id: 102, displayNumber: "102", title: "НПЗ 20Г, кв. 98", address: "Астрахань, ул. Набережная Приволжского Затона, 20Г", district: "Кировский", rooms: 1, guests: 2, description: "Ищете место, где в Астрахани чувствуешь себя как дома? Добро пожаловать к Green FOX!", amenities: "Двуспальная кровать. Сплит-система, TV, стиральная машина, Wi-Fi. Кухня: плита, СВЧ, холодильник.", nearby: "Набережная у дома, Кремль 6 мин на авто.", images: ["https://optim.tildacdn.com/stor6266-3365-4332-b163-333662656335/-/format/webp/30595077.jpg.webp","https://optim.tildacdn.com/stor3034-6661-4264-b362-346238333434/-/contain/780x586/center/center/-/format/webp/41099794.jpg.webp","https://optim.tildacdn.com/stor6634-3262-4761-b038-333863313735/-/contain/780x586/center/center/-/format/webp/94113304.jpg.webp","https://optim.tildacdn.com/stor3761-6239-4564-a265-316131616539/-/contain/780x586/center/center/-/format/webp/23934394.jpg.webp"] }
+    ];
+
+    // ================================================================
+    //  СОСТОЯНИЕ
+    // ================================================================
+    let flats = JSON.parse(JSON.stringify(flatsData));
+    let currentRole = 'staff';
+    let editingFlatId = null;
+    let nextId = flats.length + 1;
+    let adminUnlocked = false;
+    const ADMIN_PASSWORD = 'greenfox2026';
+
+    // ================================================================
+    //  DOM
+    // ================================================================
+    const grid = document.getElementById('cardsGrid');
+    const modalOverlay = document.getElementById('modalOverlay');
+    const modalContent = document.getElementById('modalContent');
+    const modalClose = document.getElementById('modalClose');
+    const districtFilter = document.getElementById('districtFilter');
+    const roomsFilter = document.getElementById('roomsFilter');
+    const clearFiltersBtn = document.getElementById('clearFilters');
+    const countDisplay = document.getElementById('countDisplay');
+    const adminPanel = document.getElementById('adminPanel');
+    const adminFormContainer = document.getElementById('adminFormContainer');
+    const addFlatBtn = document.getElementById('addFlatBtn');
+    const cancelEditBtn = document.getElementById('cancelEditBtn');
+    const roleBtns = document.querySelectorAll('#rolePanel button');
+    const adminPassword = document.getElementById('adminPassword');
+    const passwordError = document.getElementById('passwordError');
+    const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+    const fullscreenImage = document.getElementById('fullscreenImage');
+
+    // ================================================================
+    //  ПОЛНОЭКРАННЫЙ ПРОСМОТР
+    // ================================================================
+    function openFullscreen(src) {
+        fullscreenImage.src = src;
+        fullscreenOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeFullscreen() {
+        fullscreenOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && fullscreenOverlay.classList.contains('active')) {
+            closeFullscreen();
+        }
+    });
+
+    // ================================================================
+    //  ФУНКЦИЯ ДЛЯ ГЕНЕРАЦИИ ЗАГЛУШКИ
+    // ================================================================
+    function getPlaceholder(title) {
+        const colors = ['#2ecc71', '#3498db', '#e74c3c', '#f39c12', '#9b59b6', '#1abc9c', '#e67e22', '#2c3e50'];
+        const color = colors[Math.floor(Math.random() * colors.length)];
+        return `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='160'%3E%3Crect width='260' height='160' fill='${color.replace('#','%23')}'/%3E%3Ctext x='130' y='80' font-family='Arial' font-size='14' fill='white' text-anchor='middle'%3E${encodeURIComponent(title)}%3C/text%3E%3Ctext x='130' y='105' font-family='Arial' font-size='12' fill='rgba(255,255,255,0.7)' text-anchor='middle'%3E📸 Фото%3C/text%3E%3C/svg%3E`;
+    }
+
+    // ================================================================
+    //  ОТРИСОВКА
+    // ================================================================
+    function renderCards() {
+        const district = districtFilter.value;
+        const rooms = roomsFilter.value;
+
+        let filtered = flats.filter(f => {
+            const districtMatch = district === 'all' || f.district === district;
+            const roomsMatch = rooms === 'all' || f.rooms === parseInt(rooms);
+            return districtMatch && roomsMatch;
+        });
+
+        countDisplay.textContent = `Всего: ${filtered.length}`;
+
+        if (filtered.length === 0) {
+            grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:40px;color:#4f657b;">Нет квартир по заданным фильтрам</div>`;
+            return;
+        }
+
+        grid.innerHTML = filtered.map(f => {
+            const imgSrc = f.images && f.images.length > 0 ? f.images[0] : getPlaceholder(f.title);
+            return `
+            <div class="card">
+                <div class="card-number">№ ${f.displayNumber || f.id}</div>
+                <img class="card-img" src="${imgSrc}" alt="${f.title}" loading="lazy" onerror="this.src='${getPlaceholder(f.title)}'">
+                <div class="card-body">
+                    <div class="card-title">${f.title}</div>
+                    <div class="card-address">${f.address}</div>
+                    <div class="card-meta">
+                        <span>${f.rooms} комн.</span>
+                        <span>${f.guests} гостя</span>
+                        <span>${f.district}</span>
+                    </div>
+                    <div class="card-actions">
+                        <button class="route-btn" onclick="event.stopPropagation(); routeTo('${f.address}')">🚗 Маршрут</button>
+                        <button onclick="event.stopPropagation(); openModal(${f.id})">📋 Подробнее</button>
+                        ${currentRole === 'admin' && adminUnlocked ? `<button class="edit-btn" onclick="event.stopPropagation(); editFlat(${f.id})">✎ Правка</button>` : ''}
+                    </div>
+                </div>
+            </div>
+        `}).join('');
+    }
+
+    // ================================================================
+    //  МОДАЛЬНОЕ ОКНО
+    // ================================================================
+    function openModal(id) {
+        const flat = flats.find(f => f.id === id);
+        if (!flat) return;
+
+        const imagesHtml = flat.images && flat.images.length > 0
+            ? flat.images.map(img => `<img src="${img}" alt="фото" onclick="event.stopPropagation(); openFullscreen('${img}')">`).join('')
+            : '<span style="color:#4f657b;">Фото отсутствуют</span>';
+
+        modalContent.innerHTML = `
+            <div class="modal-title">${flat.title}</div>
+            <div class="modal-sub">${flat.address}</div>
+            <div class="modal-detail"><strong>Район:</strong> ${flat.district} | <strong>Комнат:</strong> ${flat.rooms} | <strong>Гостей:</strong> ${flat.guests}</div>
+            <div class="modal-detail"><strong>Описание:</strong> ${flat.description}</div>
+            <div class="modal-detail"><strong>Оснащение:</strong> ${flat.amenities}</div>
+            <div class="modal-detail"><strong>Что рядом:</strong> ${flat.nearby}</div>
+            <div class="modal-images">${imagesHtml}</div>
+            <button class="modal-route" onclick="routeTo('${flat.address}')">🚗 Проложить маршрут</button>
+        `;
+        modalOverlay.classList.add('active');
+    }
+
+    function closeModal() { modalOverlay.classList.remove('active'); }
+    modalClose.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) closeModal(); });
+
+    // ================================================================
+    //  МАРШРУТ
+    // ================================================================
+    function routeTo(address) {
+        const query = encodeURIComponent(`Астрахань, ${address}`);
+        window.open(`https://yandex.ru/maps/?text=${query}&mode=routes`, '_blank');
+    }
+
+    // ================================================================
+    //  ФИЛЬТРЫ
+    // ================================================================
+    districtFilter.addEventListener('change', renderCards);
+    roomsFilter.addEventListener('change', renderCards);
+    clearFiltersBtn.addEventListener('click', () => {
+        districtFilter.value = 'all';
+        roomsFilter.value = 'all';
+        renderCards();
+    });
+
+    // ================================================================
+    //  РОЛИ С ПАРОЛЕМ
+    // ================================================================
+    function setRole(role) {
+        if (role === 'admin' && !adminUnlocked) {
+            const pass = adminPassword.value.trim();
+            if (pass === ADMIN_PASSWORD) {
+                adminUnlocked = true;
+                passwordError.classList.remove('show');
+                applyAdminRole();
+            } else {
+                passwordError.classList.add('show');
+                roleBtns.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.role === 'staff');
+                });
+                currentRole = 'staff';
+                adminPanel.classList.remove('active');
+                renderCards();
+                return;
+            }
+        } else if (role === 'admin' && adminUnlocked) {
+            applyAdminRole();
+        } else {
+            currentRole = 'staff';
+            roleBtns.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.role === 'staff');
+            });
+            adminPanel.classList.remove('active');
+            adminFormContainer.innerHTML = '';
+            editingFlatId = null;
+            renderCards();
+        }
+    }
+
+    function applyAdminRole() {
+        currentRole = 'admin';
+        roleBtns.forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.role === 'admin');
+        });
+        adminPanel.classList.add('active');
+        renderCards();
+    }
+
+    roleBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const role = btn.dataset.role;
+            if (role === 'admin') {
+                if (!adminUnlocked) {
+                    const pass = adminPassword.value.trim();
+                    if (pass === ADMIN_PASSWORD) {
+                        adminUnlocked = true;
+                        passwordError.classList.remove('show');
+                        applyAdminRole();
+                    } else {
+                        passwordError.classList.add('show');
+                        roleBtns.forEach(b => {
+                            b.classList.toggle('active', b.dataset.role === 'staff');
+                        });
+                        currentRole = 'staff';
+                        adminPanel.classList.remove('active');
+                        renderCards();
+                    }
+                } else {
+                    applyAdminRole();
+                }
+            } else {
+                adminUnlocked = false;
+                adminPassword.value = '';
+                passwordError.classList.remove('show');
+                setRole('staff');
+            }
+        });
+    });
+
+    adminPassword.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            setRole('admin');
+        }
+    });
+
+    // ================================================================
+    //  АДМИН: РЕДАКТИРОВАНИЕ / ДОБАВЛЕНИЕ / УДАЛЕНИЕ
+    // ================================================================
+    function editFlat(id) {
+        if (currentRole !== 'admin' || !adminUnlocked) return;
+        const flat = flats.find(f => f.id === id);
+        if (!flat) return;
+        editingFlatId = id;
+        showAdminForm(flat);
+    }
+
+    function showAdminForm(flat = null) {
+        const isEdit = !!flat;
+        const f = flat || { title: '', address: '', district: 'Ленинский', rooms: 1, guests: 2, description: '', amenities: '', nearby: '', images: [''] };
+        const deleteBtnHtml = isEdit ? `<button class="delete-btn" id="deleteFlatBtn">🗑 Удалить</button>` : '';
+        adminFormContainer.innerHTML = `
+            <div class="admin-form">
+                <label>Номер (для отображения) <input id="af-displayNumber" value="${f.displayNumber || ''}" placeholder="01, 02, ..."></label>
+                <label>Название <input id="af-title" value="${f.title}" placeholder="Аршанский 4, кв. 10"></label>
+                <label>Адрес <input id="af-address" value="${f.address}" placeholder="Астрахань, ул. ..."></label>
+                <label>Район 
+                    <select id="af-district">
+                        ${['Ленинский','Кировский','Советский','Трусовский'].map(d => `<option value="${d}" ${f.district===d?'selected':''}>${d}</option>`).join('')}
+                    </select>
+                </label>
+                <label>Комнат <input id="af-rooms" type="number" value="${f.rooms}" min="1"></label>
+                <label>Гостей <input id="af-guests" type="number" value="${f.guests}" min="1"></label>
+                <label class="full">Описание <textarea id="af-description" rows="2">${f.description}</textarea></label>
+                <label class="full">Оснащение <textarea id="af-amenities" rows="2">${f.amenities}</textarea></label>
+                <label class="full">Что рядом <textarea id="af-nearby" rows="2">${f.nearby}</textarea></label>
+                <label class="full">Фото (ссылки через запятую) <input id="af-images" value="${f.images.join(', ')}" placeholder="https://..., https://..."></label>
+                <div class="btn-group">
+                    <button class="save-btn" id="saveFlatBtn">${isEdit ? '💾 Обновить' : '➕ Добавить'}</button>
+                    ${deleteBtnHtml}
+                </div>
+            </div>
+        `;
+
+        document.getElementById('saveFlatBtn').addEventListener('click', () => {
+            const displayNumber = document.getElementById('af-displayNumber').value.trim();
+            const title = document.getElementById('af-title').value.trim();
+            const address = document.getElementById('af-address').value.trim();
+            const district = document.getElementById('af-district').value;
+            const rooms = parseInt(document.getElementById('af-rooms').value) || 1;
+            const guests = parseInt(document.getElementById('af-guests').value) || 1;
+            const description = document.getElementById('af-description').value.trim();
+            const amenities = document.getElementById('af-amenities').value.trim();
+            const nearby = document.getElementById('af-nearby').value.trim();
+            const images = document.getElementById('af-images').value.split(',').map(s => s.trim()).filter(Boolean);
+            if (!title || !address) { alert('Название и адрес обязательны'); return; }
+            const flatData = { title, address, district, rooms, guests, description, amenities, nearby, images: images.length ? images : [''] };
+            if (displayNumber) flatData.displayNumber = displayNumber;
+
+            if (isEdit) {
+                const idx = flats.findIndex(f => f.id === editingFlatId);
+                if (idx !== -1) flats[idx] = { ...flats[idx], ...flatData };
+            } else {
+                flatData.id = nextId++;
+                flats.push(flatData);
+            }
+            editingFlatId = null;
+            adminFormContainer.innerHTML = '';
+            renderCards();
+        });
+
+        const deleteBtn = document.getElementById('deleteFlatBtn');
+        if (deleteBtn) {
+            deleteBtn.addEventListener('click', () => {
+                if (confirm(`Вы уверены, что хотите удалить квартиру "${f.title}"?`)) {
+                    flats = flats.filter(item => item.id !== f.id);
+                    editingFlatId = null;
+                    adminFormContainer.innerHTML = '';
+                    renderCards();
+                }
+            });
+        }
+    }
+
+    addFlatBtn.addEventListener('click', () => {
+        if (currentRole !== 'admin' || !adminUnlocked) return;
+        editingFlatId = null;
+        showAdminForm(null);
+    });
+
+    cancelEditBtn.addEventListener('click', () => {
+        adminFormContainer.innerHTML = '';
+        editingFlatId = null;
+    });
+
+    // ================================================================
+    //  СТАРТ
+    // ================================================================
+    setRole('staff');
+</script>
+</body>
+</html>
